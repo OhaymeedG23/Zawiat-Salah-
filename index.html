@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>متابعة العبادات</title>
+  <style>
+    :root {
+      --bg-color: #0b132b;
+      --card-bg: #1c2541;
+      --accent: #ffffff;
+      --subtext: #8d99ae;
+      --green: #2ec4b6;
+      --red: #e71d36;
+      --border: #3a506b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--accent);
+      padding: 24px 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-bottom: 16px;
+      font-size: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    /* الصلوات اليومية */
+    .prayer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .prayer-row:last-child {
+      border-bottom: none;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .circle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      color: var(--accent);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+
+    .circle-btn.done {
+      background-color: var(--green);
+      border-color: var(--green);
+      color: #0b132b;
+    }
+
+    .circle-btn.missed {
+      background-color: var(--red);
+      border-color: var(--red);
+      color: #ffffff;
+    }
+
+    /* العدادات العامة */
+    .counter-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      background: rgba(11, 19, 43, 0.6);
+      padding: 12px 16px;
+      border-radius: 8px;
+    }
+
+    .counter-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .count-display {
+      font-size: 1.3rem;
+      font-weight: bold;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .mini-btn {
+      width: 34px;
+      height: 34px;
+      background-color: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .mini-btn:active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* عداد الأذكار */
+    .dhikr-section {
+      text-align: center;
+    }
+
+    .dhikr-display {
+      font-size: 3.5rem;
+      font-weight: bold;
+      margin: 15px 0;
+      letter-spacing: 2px;
+    }
+
+    .big-dhikr-btn {
+      width: 100%;
+      height: 90px;
+      background-color: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      font-size: 1.6rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.1s, transform 0.1s;
+    }
+
+    .big-dhikr-btn:active {
+      transform: scale(0.98);
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .reset-btn {
+      margin-top: 14px;
+      background: transparent;
+      color: var(--subtext);
+      border: none;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .reset-btn:hover {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- الصلوات اليومية -->
+    <div class="card">
+      <h2>الصلوات المفروضة اليوم</h2>
+      <div id="prayers-list"></div>
+    </div>
+
+    <!-- صلوات القضاء -->
+    <div class="card">
+      <h2>تعداد صلوات القضاء</h2>
+      <div id="qada-list"></div>
+    </div>
+
+    <!-- صيام القضاء / التطوع -->
+    <div class="card">
+      <h2>تعداد أيام الصيام</h2>
+      <div class="counter-box">
+        <span>أيام قضاء الصيام المتبقية:</span>
+        <div class="counter-controls">
+          <button class="mini-btn" onclick="updateFasting(-1)">-</button>
+          <span class="count-display" id="fasting-count">0</span>
+          <button class="mini-btn" onclick="updateFasting(1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- مسبحة الأذكار -->
+    <div class="card dhikr-section">
+      <h2>عداد الأذكار</h2>
+      <div class="dhikr-display" id="dhikr-count">0</div>
+      <button class="big-dhikr-btn" onclick="incrementDhikr()">تسبيح (+1)</button>
+      <div>
+        <button class="reset-btn" onclick="resetDhikr()">البدء من جديد (تصفير العداد)</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const prayers = ["الفجر", "الظهر", "العصر", "المغرب", "العشاء"];
+
+    // تحميل البيانات المحفوظة
+    let prayerStatus = JSON.parse(localStorage.getItem('prayerStatus')) || {};
+    let qadaCounts = JSON.parse(localStorage.getItem('qadaCounts')) || { "الفجر": 0, "الظهر": 0, "العصر": 0, "المغرب": 0, "العشاء": 0 };
+    let fastingDays = parseInt(localStorage.getItem('fastingDays')) || 0;
+    let dhikrCount = parseInt(localStorage.getItem('dhikrCount')) || 0;
+
+    // تهيئة الصلوات اليومية
+    function renderPrayers() {
+      const container = document.getElementById('prayers-list');
+      container.innerHTML = '';
+      prayers.forEach(p => {
+        const status = prayerStatus[p] || 'none';
+        const row = document.createElement('div');
+        row.className = 'prayer-row';
+        row.innerHTML = `
+          <span>${p}</span>
+          <div class="btn-group">
+            <button class="circle-btn ${status === 'done' ? 'done' : ''}" onclick="setPrayerStatus('${p}', 'done')">✓</button>
+            <button class="circle-btn ${status === 'missed' ? 'missed' : ''}" onclick="setPrayerStatus('${p}', 'missed')">✕</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function setPrayerStatus(prayer, status) {
+      prayerStatus[prayer] = prayerStatus[prayer] === status ? 'none' : status;
+      localStorage.setItem('prayerStatus', JSON.stringify(prayerStatus));
+      renderPrayers();
+    }
+
+    // تهيئة صلوات القضاء
+    function renderQada() {
+      const container = document.getElementById('qada-list');
+      container.innerHTML = '';
+      prayers.forEach(p => {
+        const count = qadaCounts[p] || 0;
+        const box = document.createElement('div');
+        box.className = 'counter-box';
+        box.innerHTML = `
+          <span>قضاء صلاة ${p}</span>
+          <div class="counter-controls">
+            <button class="mini-btn" onclick="updateQada('${p}', -1)">-</button>
+            <span class="count-display">${count}</span>
+            <button class="mini-btn" onclick="updateQada('${p}', 1)">+</button>
+          </div>
+        `;
+        container.appendChild(box);
+      });
+    }
+
+    function updateQada(prayer, amount) {
+      qadaCounts[prayer] = Math.max(0, (qadaCounts[prayer] || 0) + amount);
+      localStorage.setItem('qadaCounts', JSON.stringify(qadaCounts));
+      renderQada();
+    }
+
+    // إدارة الصيام
+    function updateFasting(amount) {
+      fastingDays = Math.max(0, fastingDays + amount);
+      localStorage.setItem('fastingDays', fastingDays);
+      document.getElementById('fasting-count').innerText = fastingDays;
+    }
+
+    // إدارة الأذكار
+    function incrementDhikr() {
+      dhikrCount++;
+      localStorage.setItem('dhikrCount', dhikrCount);
+      document.getElementById('dhikr-count').innerText = dhikrCount;
+    }
+
+    function resetDhikr() {
+      dhikrCount = 0;
+      localStorage.setItem('dhikrCount', dhikrCount);
+      document.getElementById('dhikr-count').innerText = dhikrCount;
+    }
+
+    // تشغيل الإعداد الأولي
+    renderPrayers();
+    renderQada();
+    document.getElementById('fasting-count').innerText = fastingDays;
+    document.getElementById('dhikr-count').innerText = dhikrCount;
+  </script>
+</body>
+</html>
